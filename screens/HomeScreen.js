@@ -1,93 +1,105 @@
+import React, { useState } from "react";
 import {
   View,
   Text,
   Image,
   TouchableOpacity,
-  TextInput,
   FlatList,
   Dimensions,
   Platform,
-  Button,
 } from "react-native";
-import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { themeColors } from "../theme";
 import { StatusBar } from "expo-status-bar";
-import { categories, coffeeItems } from "../constants";
 import Carousel from "react-native-snap-carousel";
 import CoffeeCard from "../components/coffeeCard";
 import { BellIcon, MagnifyingGlassIcon } from "react-native-heroicons/outline";
 import { MapPinIcon } from "react-native-heroicons/solid";
 import { useNavigation } from "@react-navigation/native";
+import { categories, foodsItems } from "../constants/index";
+import Search from "../components/Search";
 
 const { width, height } = Dimensions.get("window");
 const ios = Platform.OS == "ios";
-export default function HomeScreen() {
-  const [activeCategory, setActiveCategory] = useState(1);
 
+export default function HomeScreen() {
+  const [activeCategory, setActiveCategory] = useState(null);
   const navigation = useNavigation();
 
+  // Lọc danh sách sản phẩm dựa trên danh mục được chọn
+  const filteredFoods = activeCategory
+    ? foodsItems.filter((item) => item.categoryId === activeCategory)
+    : foodsItems;
+
   return (
-    <View className="flex-1 relative bg-white">
+    <View style={{ flex: 1, backgroundColor: "white" }}>
       <StatusBar />
 
-      <Image
-        source={require("../assets/images/beansBackground1.png")}
-        style={{ height: height * 0.2 }}
-        className="w-full absolute -top-5 opacity-10"
-      />
-      <SafeAreaView className={ios ? "-mb-8" : ""}>
+      <SafeAreaView style={ios ? { marginBottom: -8 } : null}>
         {/* avatar and bell icon */}
-        <View className="mx-4 flex-row justify-between items-center">
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginHorizontal: 16,
+          }}
+        >
           <TouchableOpacity onPress={() => navigation.navigate("Login")}>
             <Image
               source={require("../assets/images/avatar.png")}
-              className="h-9 w-9 rounded-full"
+              style={{ height: 45, width: 45, borderRadius: 22.5 }}
             />
           </TouchableOpacity>
-          <View className="flex-row items-center space-x-2">
-            <MapPinIcon size="25" color={themeColors.bgLight} />
-            <Text className="font-semibold text-base">New York, NYC</Text>
+          <View
+            style={{ flexDirection: "row", alignItems: "center", spacing: 2 }}
+          >
+            <MapPinIcon size={25} color={themeColors.bgLight} />
+            <Text style={{ fontWeight: "600", fontSize: 16 }}>
+              New York, NYC
+            </Text>
           </View>
-          <BellIcon size="27" color="black" />
+          <TouchableOpacity onPress={() => navigation.navigate("Menu")}>
+            <BellIcon size={27} color="black" />
+          </TouchableOpacity>
         </View>
+
         {/* search bar */}
-        <View className="mx-5 shadow" style={{ marginTop: height * 0.06 }}>
-          <View className="flex-row items-center rounded-full p-1 bg-[#e6e6e6]">
-            <TextInput
-              placeholder="Search"
-              className="p-4 flex-1 font-semibold text-gray-700"
-            />
-            <TouchableOpacity
-              className="rounded-full p-2"
-              style={{ backgroundColor: themeColors.bgLight }}
-            >
-              <MagnifyingGlassIcon size="25" strokeWidth={2} color="white" />
-            </TouchableOpacity>
-          </View>
-        </View>
+        <Search />
+
         {/* categories */}
-        <View className="px-5 mt-6">
+        <View style={{ paddingHorizontal: 16, marginTop: 24 }}>
           <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
             data={categories}
             keyExtractor={(item) => item.id}
-            className="overflow-visible"
             renderItem={({ item }) => {
-              isActive = item.id == activeCategory;
-              let activeTextClass = isActive ? "text-white" : "text-gray-700";
+              const isActive = item.id === activeCategory;
+              const activeTextStyles = isActive
+                ? { color: "white" }
+                : { color: "gray" };
+              const categoryBackground = isActive
+                ? themeColors.bgLight
+                : "rgba(0,0,0,0.07)";
+
               return (
                 <TouchableOpacity
                   onPress={() => setActiveCategory(item.id)}
                   style={{
-                    backgroundColor: isActive
-                      ? themeColors.bgLight
-                      : "rgba(0,0,0,0.07)",
+                    paddingHorizontal: 16,
+                    paddingVertical: 10,
+                    marginRight: 8,
+                    borderRadius: 25,
+                    backgroundColor: categoryBackground,
                   }}
-                  className="p-4 px-5 mr-2 rounded-full shadow"
                 >
-                  <Text className={"font-semibold " + activeTextClass}>
+                  <Text
+                    style={[
+                      { fontWeight: "600", fontSize: 16 },
+                      activeTextStyles,
+                    ]}
+                  >
                     {item.title}
                   </Text>
                 </TouchableOpacity>
@@ -99,14 +111,11 @@ export default function HomeScreen() {
 
       {/* coffee cards */}
       <View
-        className={`overflow-visible flex justify-center flex-1 ${
-          ios ? "mt-10" : ""
-        }`}
+        style={{ flex: 1, justifyContent: "center", marginTop: ios ? 40 : 0 }}
       >
         <View>
           <Carousel
-            containerCustomStyle={{ overflow: "visible" }}
-            data={coffeeItems}
+            data={filteredFoods}
             renderItem={({ item }) => <CoffeeCard item={item} />}
             firstItem={1}
             loop={true}
@@ -114,7 +123,6 @@ export default function HomeScreen() {
             inactiveSlideOpacity={0.75}
             sliderWidth={width}
             itemWidth={width * 0.63}
-            slideStyle={{ display: "flex", alignItems: "center" }}
           />
         </View>
       </View>

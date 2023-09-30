@@ -5,6 +5,7 @@ import HomeScreen from "../screens/HomeScreen";
 import { Dimensions, LogBox, Platform, Text, View } from "react-native";
 import ProductScreen from "../screens/ProductScreen";
 import { themeColors } from "../theme";
+import Menu from "../screens/Menu";
 
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
@@ -49,6 +50,11 @@ export default function AppNavigation() {
           options={{ headerShown: false }}
           component={LoginScreen}
         />
+        <Stack.Screen
+          name="Menu"
+          options={{ headerShown: false }}
+          component={Menu}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -76,9 +82,10 @@ function HomeTabs() {
       })}
     >
       <Tab.Screen name="home" component={HomeScreen} />
-      <Tab.Screen name="favourite" component={HomeScreen} />
+      <Tab.Screen name="favourite" component={ProductScreen} />
       <Tab.Screen name="cart" component={HomeScreen} />
       <Tab.Screen name="login" component={HomeScreen} />
+      <Tab.Screen name="menu" component={HomeScreen} />
     </Tab.Navigator>
   );
 }
